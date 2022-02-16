@@ -17,12 +17,12 @@
 /* Example output for std_msgs_msg_String
 declare module "rclnodejs" {
   namespace std_msgs {
-	  namespace msg {
-			export type String = {
-				data: string
-			}
-		}
-	}
+    namespace msg {
+      export type String = {
+        data: string
+      }
+    }
+  }
 }
 */
 
@@ -32,14 +32,18 @@ const path = require('path');
 const fs = require('fs');
 const loader = require('../lib/interface_loader.js');
 
-async function generateAll() {
+const DEFAULT_GENERATED_ROOT_DIR = path.join(__dirname, '../generated/');
+const DEFAULT_OUTPUT_TSD_PATH = path.join(__dirname, '../types/interfaces.d.ts');
+
+async function generateAll({
+  generatedRootDir = DEFAULT_GENERATED_ROOT_DIR,
+  outputTsdPath = DEFAULT_OUTPUT_TSD_PATH,
+}) {
   // load pkg and interface info (msgs and srvs)
-  const generatedPath = path.join(__dirname, '../generated/');
-  const pkgInfos = getPkgInfos(generatedPath);
+  const pkgInfos = getPkgInfos(generatedRootDir);
 
   // write message.d.ts file
-  const messagesFilePath = path.join(__dirname, '../types/interfaces.d.ts');
-  const fd = fs.openSync(messagesFilePath, 'w');
+  const fd = fs.openSync(outputTsdPath, 'w');
   savePkgInfoAsTSD(pkgInfos, fd);
   await wait(500); // hack to avoid random segfault
   fs.closeSync(fd);
@@ -179,7 +183,7 @@ function savePkgInfoAsTSD(pkgInfos, fd) {
   fs.writeSync(
     fd,
     '  type MessageConstructorType<T> = ' +
-      'T extends MessageTypeClassName ? MessageTypeClassConstructorMap[T] : object;\n\n'
+    'T extends MessageTypeClassName ? MessageTypeClassConstructorMap[T] : object;\n\n'
   );
 
   // write services type mappings
@@ -215,7 +219,7 @@ function savePkgInfoAsTSD(pkgInfos, fd) {
   fs.writeSync(
     fd,
     '  type InterfaceType<T> = T extends TypeClassName ? ' +
-      '(MessageTypeClassConstructorMap & ServicesMap & ActionsMap)[T] : object;\n'
+    '(MessageTypeClassConstructorMap & ServicesMap & ActionsMap)[T] : object;\n'
   );
 
   // close module declare

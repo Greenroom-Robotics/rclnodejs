@@ -24,8 +24,6 @@ const flat = require('array.prototype.flat');
 
 const fsp = fs.promises;
 
-const generatedRoot = path.join(__dirname, '../generated/');
-
 function getPackageName(filePath, amentExecuted) {
   if (os.type() === 'Windows_NT') {
     filePath = filePath.replace(/\\/g, '/');
